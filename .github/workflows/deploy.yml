@@ -51,7 +51,10 @@ jobs:
           VITE_APP_CLIENT_ID: ${{ env.VITE_APP_CLIENT_ID }}
 
       - name: Install Serverless and Plugins
-        run: npm install -g serverless@3.35.2 && npm install
+        run: npm install -g serverless@3.35.2
+
+      - name: Install NPM packages
+        run: npm install
 
       - name: Deploy
         env:
