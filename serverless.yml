@@ -9,7 +9,6 @@ provider:
 
 plugins:
   - serverless-s3-sync
-  - serverless-cloudfront-invalidate
 
 custom:
   bucketName: whatsapp-expenses-bot-admin-front-${sls:stage}

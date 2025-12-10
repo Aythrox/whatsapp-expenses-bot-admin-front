@@ -1,12 +1,12 @@
 const config = {
   apiGateway: {
-    REGION: import.meta.env.VITE_AWS_REGION || 'us-east-1',
-    URL: import.meta.env.VITE_API_URL
+    REGION: 'us-east-1',
+    URL: 'https://93uvc6eo8k.execute-api.us-east-1.amazonaws.com/prod'
   },
   cognito: {
-    REGION: import.meta.env.VITE_COGNITO_REGION || 'us-east-1',
-    USER_POOL_ID: import.meta.env.VITE_USER_POOL_ID,
-    APP_CLIENT_ID: import.meta.env.VITE_APP_CLIENT_ID,
+    REGION: 'us-east-1',
+    USER_POOL_ID: 'us-east-1_QQKVVvKK3',
+    APP_CLIENT_ID: '21s8e9d57n9lljdg781r5e5hqi',
   }
 };
 
