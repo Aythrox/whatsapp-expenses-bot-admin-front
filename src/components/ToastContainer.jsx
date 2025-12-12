@@ -28,6 +28,14 @@ export const ToastProvider = ({ children }) => {
     const showWarning = useCallback((message) => addToast(message, 'warning'), [addToast]);
     const showInfo = useCallback((message) => addToast(message, 'info'), [addToast]);
 
+    React.useEffect(() => {
+        const handleUnauthorized = () => {
+            addToast('Session expired. Please log in again.', 'warning');
+        };
+        window.addEventListener('auth:unauthorized', handleUnauthorized);
+        return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    }, [addToast]);
+
     return (
         <ToastContext.Provider value={{ showSuccess, showError, showWarning, showInfo }}>
             {children}

@@ -11,14 +11,31 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         if (token) {
             setAuthToken(token);
-            // Optionally fetch user profile here if the token doesn't contain all info
-            // For now, we'll decode the token or just assume it's valid until a refreshing mechanism
             const savedUser = localStorage.getItem('user');
             if (savedUser) {
-                setUser(JSON.parse(savedUser));
+                try {
+                    setUser(JSON.parse(savedUser));
+                } catch (e) {
+                    console.error("Failed to parse user from local storage", e);
+                }
             }
         }
         setLoading(false);
+
+        // Listen for unauthorized events (dispatched by api interceptor)
+        const handleUnauthorized = () => {
+            console.warn("Session expired. Logging out in 2s.");
+            // Wait a bit to let the user see the Toast
+            setTimeout(() => {
+                logout();
+            }, 2000);
+        };
+
+        window.addEventListener('auth:unauthorized', handleUnauthorized);
+
+        return () => {
+            window.removeEventListener('auth:unauthorized', handleUnauthorized);
+        };
     }, [token]);
 
     const login = async (email, password) => {
@@ -50,8 +67,57 @@ export const AuthProvider = ({ children }) => {
         setAuthToken(null);
     };
 
+    const [activeTenantId, setActiveTenantId] = useState(localStorage.getItem('activeTenantId'));
+
+    useEffect(() => {
+        if (activeTenantId) {
+            localStorage.setItem('activeTenantId', activeTenantId);
+        } else {
+            localStorage.removeItem('activeTenantId');
+        }
+    }, [activeTenantId]);
+
+    const impersonateTenant = (tenantId) => {
+        setActiveTenantId(tenantId);
+    };
+
+    const [tenants, setTenants] = useState([]);
+    const [loadingTenants, setLoadingTenants] = useState(false);
+
+    const fetchTenants = async () => {
+        // Only fetch if we have a user and they are super_admin
+        // We check 'user' from state, but inside useEffect we might want to check the immediate value or rely on the effect dependency.
+        // It's safer to check inside the function or trust the caller.
+        try {
+            setLoadingTenants(true);
+            const response = await api.get('/admin/tenants');
+            setTenants(response.data);
+        } catch (error) {
+            console.error("Failed to fetch tenants", error);
+        } finally {
+            setLoadingTenants(false);
+        }
+    };
+
+    useEffect(() => {
+        if (user?.role === 'super_admin') {
+            fetchTenants();
+        }
+    }, [user]);
+
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+        <AuthContext.Provider value={{
+            user,
+            token,
+            login,
+            logout,
+            loading,
+            activeTenantId,
+            impersonateTenant,
+            tenants,
+            fetchTenants,
+            loadingTenants
+        }}>
             {!loading && children}
         </AuthContext.Provider>
     );

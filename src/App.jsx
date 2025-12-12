@@ -14,6 +14,8 @@ import OCRConfig from './pages/OCRConfig';
 import Login from './pages/Login';
 import BotMessages from './pages/BotMessages'; // New page
 import ToastDemo from './pages/ToastDemo'; // Demo page
+import Tenants from './pages/Tenants';
+import Employees from './pages/Employees';
 
 const NavItem = ({ to, label }) => {
     const location = useLocation();
@@ -26,6 +28,8 @@ const NavItem = ({ to, label }) => {
         </Link>
     );
 }
+
+import TenantSelector from './components/TenantSelector';
 
 const Layout = () => {
     const { user, logout } = useAuth();
@@ -44,13 +48,20 @@ const Layout = () => {
                     </div>
                 </div>
                 <nav className="flex-1 overflow-y-auto py-6">
+                    <div className="px-4 mb-4">
+                        <TenantSelector />
+                    </div>
                     <ul className="space-y-1 px-3">
                         <li><NavItem to="/" label="Dashboard" /></li>
                         <li><NavItem to="/expenses" label="Expenses" /></li>
+                        <li><NavItem to="/employees" label="Employees" /></li>
                         <li><NavItem to="/departments" label="Departments" /></li>
                         <li><NavItem to="/bot-messages" label="Bot Messages" /></li>
                         <li><NavItem to="/ocr-config" label="OCR Config" /></li>
                         <li><NavItem to="/toast-demo" label="Toast Demo" /></li>
+                        {user?.role === 'super_admin' && (
+                            <li><NavItem to="/tenants" label="Manage Tenants" /></li>
+                        )}
                     </ul>
                 </nav>
                 <div className="p-4 border-t border-gray-800/50 bg-gray-900/50">
@@ -79,10 +90,12 @@ const Layout = () => {
                         <Routes>
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/expenses" element={<Expenses />} />
+                            <Route path="/employees" element={<Employees />} />
                             <Route path="/departments" element={<Departments />} />
                             <Route path="/bot-messages" element={<BotMessages />} />
                             <Route path="/ocr-config" element={<OCRConfig />} />
                             <Route path="/toast-demo" element={<ToastDemo />} />
+                            <Route path="/tenants" element={<Tenants />} />
                         </Routes>
                     </div>
                 </div>

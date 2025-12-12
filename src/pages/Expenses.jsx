@@ -18,7 +18,14 @@ function Expenses() {
         try {
             setLoading(true);
             const response = await api.get('/admin/expenses');
-            setExpenses(response.data);
+            // Normalize backend data structure to frontend expectations
+            const mappedExpenses = response.data.map(e => ({
+                ...e,
+                userId: e.PK ? e.PK.replace('USER#', '') : 'Unknown',
+                timestamp: e.created_at || (e.SK ? e.SK.replace('EXP#', '') : Date.now() / 1000),
+                uniqueKey: `${e.PK}_${e.SK}`
+            }));
+            setExpenses(mappedExpenses);
         } catch (error) {
             console.error('Error fetching expenses:', error);
             showError('Failed to load expenses. Please try again.');
@@ -95,7 +102,7 @@ function Expenses() {
                     </thead>
                     <tbody className="divide-y divide-gray-700/50">
                         {expenses.map((expense) => (
-                            <tr key={expense.timestamp} className="hover:bg-gray-700/20 transition-colors">
+                            <tr key={expense.uniqueKey} className="hover:bg-gray-700/20 transition-colors">
                                 <td className="px-6 py-4 whitespace-nowrap text-gray-300">{new Date(parseInt(expense.timestamp) * 1000).toLocaleDateString()}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-gray-300">{expense.userId}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-gray-300">{expense.description}</td>
